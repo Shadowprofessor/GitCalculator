@@ -38,4 +38,11 @@ function decrement(n, step = 1) {
   return subtract(n, step);
 }
 
-module.exports = { subtract, difference, decrement };
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { subtract, difference, decrement };
+}
+if (typeof window !== "undefined") {
+  window.subtract = subtract;
+  window.difference = difference;
+  window.decrement = decrement;
+}

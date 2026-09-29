@@ -54,4 +54,12 @@ function quotient(nums) {
   return nums.slice(1).reduce((acc, n) => divide(acc, n), nums[0]);
 }
 
-module.exports = { divide, intDivide, remainder, quotient };
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { divide, intDivide, remainder, quotient };
+}
+if (typeof window !== "undefined") {
+  window.divide = divide;
+  window.intDivide = intDivide;
+  window.remainder = remainder;
+  window.quotient = quotient;
+}

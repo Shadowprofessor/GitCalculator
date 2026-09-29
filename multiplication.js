@@ -42,4 +42,11 @@ function power(base, exp) {
   return Array.from({ length: exp }, () => base).reduce((acc, n) => multiply(acc, n), 1);
 }
 
-module.exports = { multiply, product, power };
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { multiply, product, power };
+}
+if (typeof window !== "undefined") {
+  window.multiply = multiply;
+  window.product = product;
+  window.power = power;
+}

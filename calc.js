@@ -14,10 +14,15 @@
 
 "use strict";
 
-const { add, sum, increment }         = require("./addition");
-const { subtract, difference, decrement } = require("./subtraction");
-const { multiply, product, power }    = require("./multiplication");
-const { divide, intDivide, remainder, quotient } = require("./division");
+const _addMod = typeof require !== "undefined" ? require("./addition") : { add: window.add, sum: window.sum, increment: window.increment };
+const _subMod = typeof require !== "undefined" ? require("./subtraction") : { subtract: window.subtract, difference: window.difference, decrement: window.decrement };
+const _mulMod = typeof require !== "undefined" ? require("./multiplication") : { multiply: window.multiply, product: window.product, power: window.power };
+const _divMod = typeof require !== "undefined" ? require("./division") : { divide: window.divide, intDivide: window.intDivide, remainder: window.remainder, quotient: window.quotient };
+
+const { add, sum, increment }         = _addMod;
+const { subtract, difference, decrement } = _subMod;
+const { multiply, product, power }    = _mulMod;
+const { divide, intDivide, remainder, quotient } = _divMod;
 
 // ─── Unified API ────────────────────────────────────────────────────────────
 
@@ -161,21 +166,277 @@ function runDemo() {
   console.log(`${C.bold}  All operations complete.${C.reset}\n`);
 }
 
-// ─── Entry point ─────────────────────────────────────────────────────────────
+// ─── Interactive CLI Menu ───────────────────────────────────────────────────
 
-const [,, ...args] = process.argv;
+const readline = typeof require !== "undefined" ? require("readline") : null;
 
-if (args.length > 0) {
-  const expr = args.join(" ");
-  try {
-    const result = calc.evaluate(expr);
-    console.log(`\n  ${C.yellow}${expr}${C.reset}  ${C.bold}${C.green}= ${result}${C.reset}\n`);
-  } catch (e) {
-    console.error(`\n  ${C.red}Error: ${e.message}${C.reset}\n`);
-    process.exit(1);
-  }
-} else {
-  runDemo();
+function askQuestion(rl, query) {
+  return new Promise(resolve => rl.question(query, resolve));
 }
 
-module.exports = calc;
+async function runInteractiveMenu() {
+  if (!readline) return runDemo();
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  let keepRunning = true;
+
+  while (keepRunning) {
+    console.log(`\n${C.bold}${C.cyan}================================================${C.reset}`);
+    console.log(`${C.bold}${C.magenta}       ✦ CALC.JS — Interactive Calculator ✦       ${C.reset}`);
+    console.log(`${C.bold}${C.cyan}================================================${C.reset}`);
+    console.log(`  ${C.bold}Select operation:${C.reset}`);
+    console.log(`  ${C.yellow}1.${C.reset} Addition        (${C.dim}+, sum array, increment${C.reset})`);
+    console.log(`  ${C.yellow}2.${C.reset} Subtraction     (${C.dim}-, difference array, decrement${C.reset})`);
+    console.log(`  ${C.yellow}3.${C.reset} Multiplication  (${C.dim}*, product array, power ^${C.reset})`);
+    console.log(`  ${C.yellow}4.${C.reset} Division        (${C.dim}/, floor div //, remainder %${C.reset})`);
+    console.log(`  ${C.yellow}5.${C.reset} Array / List Operations (${C.dim}sum, product, quotient${C.reset})`);
+    console.log(`  ${C.yellow}6.${C.reset} Expression Evaluator    (${C.dim}e.g., "12 * (8 + 3)"${C.reset})`);
+    console.log(`  ${C.yellow}7.${C.reset} Launch Web UI Server    (${C.dim}Open browser interface${C.reset})`);
+    console.log(`  ${C.yellow}8.${C.reset} Run Built-in Demo & Benchmark`);
+    console.log(`  ${C.yellow}9.${C.reset} Exit`);
+    console.log(`${C.cyan}------------------------------------------------${C.reset}`);
+
+    const choice = (await askQuestion(rl, `${C.bold}Enter choice (1-9): ${C.reset}`)).trim();
+
+    switch (choice) {
+      case "1": {
+        console.log(`\n${C.bold}${C.cyan}--- Addition Menu ---${C.reset}`);
+        console.log(`  1. Add two numbers (a + b)`);
+        console.log(`  2. Sum an array of numbers`);
+        console.log(`  3. Increment a number`);
+        const sub = (await askQuestion(rl, `${C.bold}Select sub-option (1-3): ${C.reset}`)).trim();
+        if (sub === "1") {
+          const a = parseFloat(await askQuestion(rl, "Enter first number (a): "));
+          const b = parseFloat(await askQuestion(rl, "Enter second number (b): "));
+          if (isNaN(a) || isNaN(b)) {
+            console.log(`${C.red}Invalid input! Please enter valid numbers.${C.reset}`);
+          } else {
+            console.log(`\n  ${C.yellow}${a} + ${b}${C.reset}  ${C.bold}${C.green}= ${calc.add(a, b)}${C.reset}`);
+          }
+        } else if (sub === "2") {
+          const input = await askQuestion(rl, "Enter comma-separated numbers (e.g. 10, 20, 30): ");
+          const nums = input.split(",").map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+          if (nums.length === 0) {
+            console.log(`${C.red}No valid numbers provided!${C.reset}`);
+          } else {
+            console.log(`\n  ${C.yellow}sum([${nums.join(", ")}])${C.reset}  ${C.bold}${C.green}= ${calc.sum(nums)}${C.reset}`);
+          }
+        } else if (sub === "3") {
+          const n = parseFloat(await askQuestion(rl, "Enter number: "));
+          const stepInput = await askQuestion(rl, "Enter step (press Enter for default 1): ");
+          const step = stepInput.trim() ? parseFloat(stepInput) : 1;
+          if (isNaN(n) || isNaN(step)) {
+            console.log(`${C.red}Invalid input!${C.reset}`);
+          } else {
+            console.log(`\n  ${C.yellow}increment(${n}, step=${step})${C.reset}  ${C.bold}${C.green}= ${calc.increment(n, step)}${C.reset}`);
+          }
+        }
+        break;
+      }
+      case "2": {
+        console.log(`\n${C.bold}${C.cyan}--- Subtraction Menu ---${C.reset}`);
+        console.log(`  1. Subtract two numbers (a - b)`);
+        console.log(`  2. Difference of an array`);
+        console.log(`  3. Decrement a number`);
+        const sub = (await askQuestion(rl, `${C.bold}Select sub-option (1-3): ${C.reset}`)).trim();
+        if (sub === "1") {
+          const a = parseFloat(await askQuestion(rl, "Enter first number (a): "));
+          const b = parseFloat(await askQuestion(rl, "Enter second number (b): "));
+          if (isNaN(a) || isNaN(b)) {
+            console.log(`${C.red}Invalid input! Please enter valid numbers.${C.reset}`);
+          } else {
+            console.log(`\n  ${C.yellow}${a} - ${b}${C.reset}  ${C.bold}${C.green}= ${calc.subtract(a, b)}${C.reset}`);
+          }
+        } else if (sub === "2") {
+          const input = await askQuestion(rl, "Enter comma-separated numbers: ");
+          const nums = input.split(",").map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+          if (nums.length === 0) {
+            console.log(`${C.red}No valid numbers provided!${C.reset}`);
+          } else {
+            console.log(`\n  ${C.yellow}difference([${nums.join(", ")}])${C.reset}  ${C.bold}${C.green}= ${calc.difference(nums)}${C.reset}`);
+          }
+        } else if (sub === "3") {
+          const n = parseFloat(await askQuestion(rl, "Enter number: "));
+          const stepInput = await askQuestion(rl, "Enter step (press Enter for default 1): ");
+          const step = stepInput.trim() ? parseFloat(stepInput) : 1;
+          if (isNaN(n) || isNaN(step)) {
+            console.log(`${C.red}Invalid input!${C.reset}`);
+          } else {
+            console.log(`\n  ${C.yellow}decrement(${n}, step=${step})${C.reset}  ${C.bold}${C.green}= ${calc.decrement(n, step)}${C.reset}`);
+          }
+        }
+        break;
+      }
+      case "3": {
+        console.log(`\n${C.bold}${C.cyan}--- Multiplication Menu ---${C.reset}`);
+        console.log(`  1. Multiply two numbers (a * b)`);
+        console.log(`  2. Product of an array`);
+        console.log(`  3. Power (base ^ exp)`);
+        const sub = (await askQuestion(rl, `${C.bold}Select sub-option (1-3): ${C.reset}`)).trim();
+        if (sub === "1") {
+          const a = parseFloat(await askQuestion(rl, "Enter first number (a): "));
+          const b = parseFloat(await askQuestion(rl, "Enter second number (b): "));
+          if (isNaN(a) || isNaN(b)) {
+            console.log(`${C.red}Invalid input!${C.reset}`);
+          } else {
+            console.log(`\n  ${C.yellow}${a} * ${b}${C.reset}  ${C.bold}${C.green}= ${calc.multiply(a, b)}${C.reset}`);
+          }
+        } else if (sub === "2") {
+          const input = await askQuestion(rl, "Enter comma-separated numbers: ");
+          const nums = input.split(",").map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+          if (nums.length === 0) {
+            console.log(`${C.red}No valid numbers provided!${C.reset}`);
+          } else {
+            console.log(`\n  ${C.yellow}product([${nums.join(", ")}])${C.reset}  ${C.bold}${C.green}= ${calc.product(nums)}${C.reset}`);
+          }
+        } else if (sub === "3") {
+          const base = parseFloat(await askQuestion(rl, "Enter base: "));
+          const exp = parseInt(await askQuestion(rl, "Enter integer exponent: "));
+          if (isNaN(base) || isNaN(exp)) {
+            console.log(`${C.red}Invalid input!${C.reset}`);
+          } else {
+            try {
+              console.log(`\n  ${C.yellow}${base} ^ ${exp}${C.reset}  ${C.bold}${C.green}= ${calc.power(base, exp)}${C.reset}`);
+            } catch (err) {
+              console.log(`${C.red}Error: ${err.message}${C.reset}`);
+            }
+          }
+        }
+        break;
+      }
+      case "4": {
+        console.log(`\n${C.bold}${C.cyan}--- Division Menu ---${C.reset}`);
+        console.log(`  1. Divide (a / b)`);
+        console.log(`  2. Integer Floor Division (a // b)`);
+        console.log(`  3. Remainder / Modulo (a % b)`);
+        console.log(`  4. Quotient of array`);
+        const sub = (await askQuestion(rl, `${C.bold}Select sub-option (1-4): ${C.reset}`)).trim();
+        if (sub === "1" || sub === "2" || sub === "3") {
+          const a = parseFloat(await askQuestion(rl, "Enter numerator (a): "));
+          const b = parseFloat(await askQuestion(rl, "Enter denominator (b): "));
+          if (isNaN(a) || isNaN(b)) {
+            console.log(`${C.red}Invalid input!${C.reset}`);
+          } else {
+            try {
+              let res, opSymbol;
+              if (sub === "1") { res = calc.divide(a, b); opSymbol = "/"; }
+              else if (sub === "2") { res = calc.intDivide(a, b); opSymbol = "//"; }
+              else if (sub === "3") { res = calc.remainder(a, b); opSymbol = "%"; }
+              console.log(`\n  ${C.yellow}${a} ${opSymbol} ${b}${C.reset}  ${C.bold}${C.green}= ${res}${C.reset}`);
+            } catch (err) {
+              console.log(`${C.red}Error: ${err.message}${C.reset}`);
+            }
+          }
+        } else if (sub === "4") {
+          const input = await askQuestion(rl, "Enter comma-separated numbers: ");
+          const nums = input.split(",").map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+          if (nums.length === 0) {
+            console.log(`${C.red}No valid numbers provided!${C.reset}`);
+          } else {
+            try {
+              console.log(`\n  ${C.yellow}quotient([${nums.join(", ")}])${C.reset}  ${C.bold}${C.green}= ${calc.quotient(nums)}${C.reset}`);
+            } catch (err) {
+              console.log(`${C.red}Error: ${err.message}${C.reset}`);
+            }
+          }
+        }
+        break;
+      }
+      case "5": {
+        console.log(`\n${C.bold}${C.cyan}--- Array / List Operations ---${C.reset}`);
+        const input = await askQuestion(rl, "Enter comma-separated numbers (e.g. 10, 20, 30): ");
+        const nums = input.split(",").map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
+        if (nums.length === 0) {
+          console.log(`${C.red}No valid numbers entered!${C.reset}`);
+        } else {
+          console.log(`  Numbers: [${nums.join(", ")}]`);
+          console.log(`  1. Sum       = ${calc.sum(nums)}`);
+          console.log(`  2. Product   = ${calc.product(nums)}`);
+          console.log(`  3. Difference= ${calc.difference(nums)}`);
+          try {
+            console.log(`  4. Quotient  = ${calc.quotient(nums)}`);
+          } catch (err) {
+            console.log(`  4. Quotient  = Error: ${err.message}`);
+          }
+        }
+        break;
+      }
+      case "6": {
+        console.log(`\n${C.bold}${C.cyan}--- Expression Evaluator ---${C.reset}`);
+        const expr = await askQuestion(rl, 'Enter expression (e.g. "42 * 3" or "100 // 4" or "3 ^ 5"): ');
+        if (!expr.trim()) {
+          console.log(`${C.red}Expression cannot be empty!${C.reset}`);
+        } else {
+          try {
+            const res = calc.evaluate(expr);
+            console.log(`\n  ${C.yellow}"${expr}"${C.reset}  ${C.bold}${C.green}= ${res}${C.reset}`);
+          } catch (err) {
+            console.log(`${C.red}Error: ${err.message}${C.reset}`);
+          }
+        }
+        break;
+      }
+      case "7": {
+        console.log(`\n${C.bold}${C.green}Launching Web UI...${C.reset}`);
+        const open = require("child_process");
+        const url = `file:///${__dirname.replace(/\\/g, "/")}/index.html`;
+        console.log(`  Opening: ${url}`);
+        open.exec(`start "" "${url}"`);
+        break;
+      }
+      case "8": {
+        runDemo();
+        break;
+      }
+      case "9": {
+        console.log(`\n${C.bold}${C.magenta}Thank you for using Calc.js! Goodbye! ✦${C.reset}\n`);
+        keepRunning = false;
+        rl.close();
+        process.exit(0);
+      }
+      default: {
+        console.log(`${C.red}Invalid choice! Please enter a number between 1 and 9.${C.reset}`);
+      }
+    }
+
+    if (keepRunning) {
+      const cont = await askQuestion(rl, `\n${C.bold}Let's do next calculation? (yes/no): ${C.reset}`);
+      if (cont.trim().toLowerCase() === "no" || cont.trim().toLowerCase() === "n") {
+        console.log(`\n${C.bold}${C.magenta}Thank you for using Calc.js! Goodbye! ✦${C.reset}\n`);
+        keepRunning = false;
+        rl.close();
+        process.exit(0);
+      }
+    }
+  }
+}
+
+// ─── Entry point ─────────────────────────────────────────────────────────────
+
+if (typeof process !== "undefined" && process.argv && (typeof require !== "undefined" && require.main === module)) {
+  const [,, ...args] = process.argv;
+
+  if (args.length > 0) {
+    const expr = args.join(" ");
+    try {
+      const result = calc.evaluate(expr);
+      console.log(`\n  ${C.yellow}${expr}${C.reset}  ${C.bold}${C.green}= ${result}${C.reset}\n`);
+    } catch (e) {
+      console.error(`\n  ${C.red}Error: ${e.message}${C.reset}\n`);
+      process.exit(1);
+    }
+  } else {
+    runInteractiveMenu();
+  }
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = calc;
+}
+if (typeof window !== "undefined") {
+  window.calc = calc;
+}

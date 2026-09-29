@@ -37,4 +37,11 @@ function increment(n, step = 1) {
   return add(n, step);
 }
 
-module.exports = { add, sum, increment };
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { add, sum, increment };
+}
+if (typeof window !== "undefined") {
+  window.add = add;
+  window.sum = sum;
+  window.increment = increment;
+}

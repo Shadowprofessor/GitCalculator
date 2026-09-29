@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git Calculator — Web UI for calc.js</title>
+  <meta name="description" content="A full-featured modern web calculator powered by modular JavaScript math utilities (calc.js). Features standard keypad, array operations, and expression evaluation.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+            <line x1="8" y1="6" x2="16" y2="6"></line>
+            <line x1="16" y1="14" x2="16" y2="18"></line>
+            <path d="M16 10h.01"></path>
+            <path d="M12 10h.01"></path>
+            <path d="M8 10h.01"></path>
+            <path d="M12 14h.01"></path>
+            <path d="M8 14h.01"></path>
+            <path d="M12 18h.01"></path>
+            <path d="M8 18h.01"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="app-title">Git Calculator</h1>
+          <p class="app-subtitle">Powered by modular <code>calc.js</code></p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge"><span class="pulse-dot"></span> v1.0.0</span>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-target="view-keypad" id="tab-keypad">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        Keypad
+      </button>
+      <button class="tab-btn" data-target="view-array" id="tab-array">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+        Array Tools
+      </button>
+      <button class="tab-btn" data-target="view-eval" id="tab-eval">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 17 10 11 4 5"></polyline>
+          <line x1="12" y1="19" x2="20" y2="19"></line>
+        </svg>
+        Expression Evaluator
+      </button>
+    </nav>
+
+    <!-- Main Content Grid -->
+    <div class="main-layout">
+      <!-- Calculator Body -->
+      <main class="calculator-card">
+        <!-- View 1: Standard Keypad -->
+        <section id="view-keypad" class="tab-view active">
+          <!-- Display Screen -->
+          <div class="display-container">
+            <div class="display-header">
+              <span id="expr-display" class="expr-display"></span>
+              <button id="copy-btn" class="icon-btn" title="Copy result" aria-label="Copy result">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+            <div id="main-display" class="main-display">0</div>
+          </div>
+
+          <!-- Keypad Grid -->
+          <div class="keypad">
+            <!-- Row 1: Function Keys -->
+            <button class="key key-danger" data-val="AC">AC</button>
+            <button class="key key-function" data-val="DEL">⌫</button>
+            <button class="key key-function" data-val="(">(</button>
+            <button class="key key-function" data-val=")">)</button>
+
+            <!-- Row 2: Advanced Math Ops -->
+            <button class="key key-operator" data-val="^" title="Power (x^y)">xʸ</button>
+            <button class="key key-operator" data-val="//" title="Integer Floor Division">//</button>
+            <button class="key key-operator" data-val="%" title="Remainder / Modulo">%</button>
+            <button class="key key-operator" data-val="/" title="Divide">÷</button>
+
+            <!-- Row 3: Numbers & Multiply -->
+            <button class="key key-num" data-val="7">7</button>
+            <button class="key key-num" data-val="8">8</button>
+            <button class="key key-num" data-val="9">9</button>
+            <button class="key key-operator" data-val="*" title="Multiply">×</button>
+
+            <!-- Row 4: Numbers & Subtract -->
+            <button class="key key-num" data-val="4">4</button>
+            <button class="key key-num" data-val="5">5</button>
+            <button class="key key-num" data-val="6">6</button>
+            <button class="key key-operator" data-val="-" title="Subtract">-</button>
+
+            <!-- Row 5: Numbers & Add -->
+            <button class="key key-num" data-val="1">1</button>
+            <button class="key key-num" data-val="2">2</button>
+            <button class="key key-num" data-val="3">3</button>
+            <button class="key key-operator" data-val="+" title="Add">+</button>
+
+            <!-- Row 6: Extras & Equals -->
+            <button class="key key-num" data-val="0">0</button>
+            <button class="key key-num" data-val=".">.</button>
+            <button class="key key-function" data-val="±" title="Toggle Sign">±</button>
+            <button class="key key-equals" data-val="=" title="Calculate">=</button>
+
+            <!-- Row 7: Helper Increment/Decrement -->
+            <button class="key key-subtle" data-val="+1" title="Increment by 1">+1</button>
+            <button class="key key-subtle" data-val="-1" title="Decrement by 1">-1</button>
+            <button class="key key-subtle" data-val="100" title="Shortcut 100">100</button>
+            <button class="key key-subtle" data-val="00" title="Shortcut 00">00</button>
+          </div>
+        </section>
+
+        <!-- View 2: Array Operations Tool -->
+        <section id="view-array" class="tab-view">
+          <div class="tool-panel">
+            <h2 class="tool-title">Array Operations</h2>
+            <p class="tool-desc">Execute modular array math functions like <code>sum([1,2,3])</code>, <code>product(...)</code>, or <code>quotient(...)</code>.</p>
+            
+            <div class="form-group">
+              <label for="array-fn-select">Function:</label>
+              <select id="array-fn-select" class="form-control">
+                <option value="sum">sum([n1, n2, ...]) — Add all numbers</option>
+                <option value="difference">difference([n1, n2, ...]) — Subtract sequentially</option>
+                <option value="product">product([n1, n2, ...]) — Multiply all numbers</option>
+                <option value="quotient">quotient([n1, n2, ...]) — Divide sequentially</option>
+                <option value="power">power(base, exp) — Base raised to exp</option>
+                <option value="intDivide">intDivide(a, b) — Integer floor division</option>
+                <option value="remainder">remainder(a, b) — Modulo remainder</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="array-input">Comma-separated values:</label>
+              <input type="text" id="array-input" class="form-control" placeholder="e.g. 50, 10, 5, 2">
+            </div>
+
+            <button id="array-compute-btn" class="btn btn-primary">Compute Result</button>
+
+            <div class="output-box">
+              <span class="output-label">Result:</span>
+              <div id="array-result-output" class="output-val">= Ready</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 3: Expression Evaluator -->
+        <section id="view-eval" class="tab-view">
+          <div class="tool-panel">
+            <h2 class="tool-title">Expression Evaluator</h2>
+            <p class="tool-desc">Parse 2-operand expressions evaluated by <code>calc.evaluate("expr")</code> (Supports <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code>, <code>%</code>, <code>//</code>).</p>
+            
+            <div class="form-group">
+              <label for="freeform-expr-input">Expression string:</label>
+              <input type="text" id="freeform-expr-input" class="form-control" placeholder="e.g. 100 // 4  or  3 ^ 5  or  17 % 5">
+            </div>
+
+            <button id="eval-expr-btn" class="btn btn-primary">Evaluate Expression</button>
+
+            <div class="output-box">
+              <span class="output-label">Evaluated Result:</span>
+              <div id="eval-result-output" class="output-val">= Ready</div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Sidebar: History Drawer -->
+      <aside class="history-card">
+        <div class="history-header">
+          <h2 class="history-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            History
+          </h2>
+          <button id="clear-history-btn" class="text-btn">Clear</button>
+        </div>
+        <div id="history-list" class="history-list">
+          <div class="history-empty">No calculations yet</div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Git Calculator • JS Math Modules (<code>addition.js</code>, <code>subtraction.js</code>, <code>multiplication.js</code>, <code>division.js</code>, <code>calc.js</code>)</p>
+    </footer>
+  </div>
+
+  <!-- Script Imports in exact order -->
+  <script src="addition.js"></script>
+  <script src="subtraction.js"></script>
+  <script src="multiplication.js"></script>
+  <script src="division.js"></script>
+  <script src="calc.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
